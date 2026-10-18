@@ -5,3 +5,6 @@ node_modules
 .env
 .env.*
 README.md
+
+# Local dev server only. Vercel would mistake a root server file for the whole app.
+dev-server.js

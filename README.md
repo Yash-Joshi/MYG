@@ -33,10 +33,10 @@ Plain HTML, CSS and JavaScript on the front end (no build step). The AI call and
 ```bash
 cd GYMBOY
 npm install        # first time only (installs the Anthropic SDK used by the server function)
-node server.js
+node dev-server.js
 ```
 
-It prints `http://localhost:8080` and a Wi-Fi address for your phone. `server.js` also runs the `/api` functions, the same files Vercel runs in production, and reads settings from a `.env` file if there is one.
+It prints `http://localhost:8080` and a Wi-Fi address for your phone. `dev-server.js` also runs the `/api` functions, the same files Vercel runs in production, and reads settings from a `.env` file if there is one.
 
 With no keys it runs in **demo mode** (local account, sample report). To try the real thing locally, copy `.env.example` to `.env` and fill it in.
 
@@ -74,7 +74,7 @@ With Supabase configured, every `/api/analyze-scan` call must carry a signed-in 
 ```
 GYMBOY/
 ├── index.html, manifest.webmanifest, sw.js   app shell, install info, offline cache (bump CACHE when files change)
-├── server.js              local dev server (static files + /api functions + .env)
+├── dev-server.js              local dev server (static files + /api functions + .env)
 ├── vercel.json, package.json, .env.example
 ├── api/
 │   ├── analyze-scan.js    POST: images + profile -> checked scan report (calls Claude)

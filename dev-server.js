@@ -2,9 +2,9 @@
 /* GymBoy dev server – serves this folder, runs the /api functions locally, and prints the
  * address to open on your phone.
  *
- *   node server.js            -> http://<your-computer-ip>:8080
- *   PORT=3000 node server.js  -> custom port
- *   HOST=127.0.0.1 node server.js  -> this computer only
+ *   node dev-server.js            -> http://<your-computer-ip>:8080
+ *   PORT=3000 node dev-server.js  -> custom port
+ *   HOST=127.0.0.1 node dev-server.js  -> this computer only
  *
  * Settings (API keys etc.) are read from a .env file in this folder if there is one. See .env.example.
  * With no ANTHROPIC_API_KEY the app runs in demo mode (a sample report); set GYMBOY_MOCK_AI=1 to
@@ -103,7 +103,7 @@ const server = http.createServer((req, res) => {
   const first = path.relative(ROOT, file).split(path.sep)[0];
 
   // never serve anything outside this folder, secrets, dependencies, or the server script itself
-  if (!file.startsWith(ROOT + path.sep) || path.basename(file) === 'server.js' || first.startsWith('.') || first === 'node_modules') {
+  if (!file.startsWith(ROOT + path.sep) || path.basename(file) === 'dev-server.js' || first.startsWith('.') || first === 'node_modules') {
     res.writeHead(403).end('Forbidden');
     return;
   }
