@@ -1,0 +1,1174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GymBoyScanReport",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "enum": [
+        "1.0"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ok",
+        "partial",
+        "needs_better_image",
+        "not_a_scan",
+        "needs_attention"
+      ],
+      "description": "ok = fully read; partial = some metrics unreadable; needs_better_image = unreadable; not_a_scan = not an InBody result; needs_attention = images disagree with each other or with the profile"
+    },
+    "user_message": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Plain-language message for the user when status is not ok (what to fix, e.g. retake with the whole sheet in frame)"
+    },
+    "scan": {
+      "type": "object",
+      "properties": {
+        "source_type": {
+          "type": "string",
+          "enum": [
+            "inbody_printout",
+            "inbody_app_screenshot",
+            "mixed",
+            "unknown"
+          ]
+        },
+        "device_model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "e.g. 'InBody 570' if printed"
+        },
+        "measured_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "ISO 8601 date-time or date, as printed"
+        },
+        "images_used": {
+          "type": "integer"
+        },
+        "units": {
+          "type": "object",
+          "properties": {
+            "mass": {
+              "type": "string",
+              "enum": [
+                "kg",
+                "lb"
+              ]
+            },
+            "length": {
+              "type": "string",
+              "enum": [
+                "cm",
+                "in"
+              ]
+            }
+          },
+          "required": [
+            "mass",
+            "length"
+          ],
+          "additionalProperties": false,
+          "description": "Units printed on the sheet. All numbers below are already normalised to kg / cm."
+        },
+        "person": {
+          "type": "object",
+          "properties": {
+            "age": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "sex": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "enum": [
+                "male",
+                "female",
+                null
+              ]
+            },
+            "height_cm": {
+              "type": [
+                "number",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "age",
+            "sex",
+            "height_cm"
+          ],
+          "additionalProperties": false
+        },
+        "quality": {
+          "type": "object",
+          "properties": {
+            "overall": {
+              "type": "string",
+              "enum": [
+                "high",
+                "medium",
+                "low"
+              ]
+            },
+            "issues": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "overall",
+            "issues"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "source_type",
+        "device_model",
+        "measured_at",
+        "images_used",
+        "units",
+        "person",
+        "quality"
+      ],
+      "additionalProperties": false
+    },
+    "metrics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "enum": [
+              "weight",
+              "skeletal_muscle_mass",
+              "body_fat_mass",
+              "body_fat_percent",
+              "lean_body_mass",
+              "total_body_water",
+              "dry_lean_mass",
+              "protein_mass",
+              "mineral_mass",
+              "bmi",
+              "bmr",
+              "visceral_fat_level",
+              "visceral_fat_area",
+              "ecw_tbw_ratio",
+              "inbody_score",
+              "waist_hip_ratio",
+              "body_cell_mass"
+            ]
+          },
+          "label": {
+            "type": "string",
+            "description": "Short human label, e.g. 'Skeletal muscle mass'"
+          },
+          "value": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Number exactly as printed, in `unit`. null if present but unreadable."
+          },
+          "unit": {
+            "type": "string",
+            "description": "kg, %, kcal, level, cm2, ratio, points"
+          },
+          "range_low": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "range_high": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "range_source": {
+            "type": "string",
+            "enum": [
+              "printed",
+              "reference",
+              "none"
+            ],
+            "description": "printed = read from the sheet; reference = fallback table in the prompt; none = no range available"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "below",
+              "within",
+              "above",
+              "unknown"
+            ]
+          },
+          "confidence": {
+            "type": "string",
+            "enum": [
+              "high",
+              "medium",
+              "low"
+            ]
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Only when something needs saying about this value, e.g. 'glare over the digits'"
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "value",
+          "unit",
+          "range_low",
+          "range_high",
+          "range_source",
+          "status",
+          "confidence",
+          "note"
+        ],
+        "additionalProperties": false,
+        "description": "One measured value found in the images. Omit metrics that are not on the sheet."
+      }
+    },
+    "segments": {
+      "type": "object",
+      "properties": {
+        "lean": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "right_arm": {
+                  "type": "object",
+                  "properties": {
+                    "mass": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "kg"
+                    },
+                    "percent_of_ideal": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "The sheet's % of normal/ideal for this segment"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "below",
+                        "normal",
+                        "above",
+                        "unknown"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "mass",
+                    "percent_of_ideal",
+                    "status"
+                  ],
+                  "additionalProperties": false
+                },
+                "left_arm": {
+                  "type": "object",
+                  "properties": {
+                    "mass": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "kg"
+                    },
+                    "percent_of_ideal": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "The sheet's % of normal/ideal for this segment"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "below",
+                        "normal",
+                        "above",
+                        "unknown"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "mass",
+                    "percent_of_ideal",
+                    "status"
+                  ],
+                  "additionalProperties": false
+                },
+                "trunk": {
+                  "type": "object",
+                  "properties": {
+                    "mass": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "kg"
+                    },
+                    "percent_of_ideal": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "The sheet's % of normal/ideal for this segment"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "below",
+                        "normal",
+                        "above",
+                        "unknown"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "mass",
+                    "percent_of_ideal",
+                    "status"
+                  ],
+                  "additionalProperties": false
+                },
+                "right_leg": {
+                  "type": "object",
+                  "properties": {
+                    "mass": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "kg"
+                    },
+                    "percent_of_ideal": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "The sheet's % of normal/ideal for this segment"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "below",
+                        "normal",
+                        "above",
+                        "unknown"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "mass",
+                    "percent_of_ideal",
+                    "status"
+                  ],
+                  "additionalProperties": false
+                },
+                "left_leg": {
+                  "type": "object",
+                  "properties": {
+                    "mass": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "kg"
+                    },
+                    "percent_of_ideal": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "The sheet's % of normal/ideal for this segment"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "below",
+                        "normal",
+                        "above",
+                        "unknown"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "mass",
+                    "percent_of_ideal",
+                    "status"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "right_arm",
+                "left_arm",
+                "trunk",
+                "right_leg",
+                "left_leg"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fat": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "right_arm": {
+                  "type": "object",
+                  "properties": {
+                    "mass": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "kg"
+                    },
+                    "percent_of_ideal": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "The sheet's % of normal/ideal for this segment"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "below",
+                        "normal",
+                        "above",
+                        "unknown"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "mass",
+                    "percent_of_ideal",
+                    "status"
+                  ],
+                  "additionalProperties": false
+                },
+                "left_arm": {
+                  "type": "object",
+                  "properties": {
+                    "mass": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "kg"
+                    },
+                    "percent_of_ideal": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "The sheet's % of normal/ideal for this segment"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "below",
+                        "normal",
+                        "above",
+                        "unknown"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "mass",
+                    "percent_of_ideal",
+                    "status"
+                  ],
+                  "additionalProperties": false
+                },
+                "trunk": {
+                  "type": "object",
+                  "properties": {
+                    "mass": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "kg"
+                    },
+                    "percent_of_ideal": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "The sheet's % of normal/ideal for this segment"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "below",
+                        "normal",
+                        "above",
+                        "unknown"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "mass",
+                    "percent_of_ideal",
+                    "status"
+                  ],
+                  "additionalProperties": false
+                },
+                "right_leg": {
+                  "type": "object",
+                  "properties": {
+                    "mass": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "kg"
+                    },
+                    "percent_of_ideal": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "The sheet's % of normal/ideal for this segment"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "below",
+                        "normal",
+                        "above",
+                        "unknown"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "mass",
+                    "percent_of_ideal",
+                    "status"
+                  ],
+                  "additionalProperties": false
+                },
+                "left_leg": {
+                  "type": "object",
+                  "properties": {
+                    "mass": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "kg"
+                    },
+                    "percent_of_ideal": {
+                      "type": [
+                        "number",
+                        "null"
+                      ],
+                      "description": "The sheet's % of normal/ideal for this segment"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "below",
+                        "normal",
+                        "above",
+                        "unknown"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "mass",
+                    "percent_of_ideal",
+                    "status"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "right_arm",
+                "left_arm",
+                "trunk",
+                "right_leg",
+                "left_leg"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "lean",
+        "fat"
+      ],
+      "additionalProperties": false,
+      "description": "Segmental analysis from the sheet"
+    },
+    "balance": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "pair": {
+            "type": "string",
+            "enum": [
+              "arms",
+              "legs"
+            ]
+          },
+          "left_value": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "right_value": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "diff_percent": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "|left-right| / the larger side * 100, one decimal"
+          },
+          "flag": {
+            "type": "string",
+            "enum": [
+              "none",
+              "mild",
+              "notable",
+              "unknown"
+            ]
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "pair",
+          "left_value",
+          "right_value",
+          "diff_percent",
+          "flag",
+          "note"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "trend": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "previous_measured_at": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "ISO 8601 date"
+            },
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "type": "string",
+                    "enum": [
+                      "weight",
+                      "skeletal_muscle_mass",
+                      "body_fat_mass",
+                      "body_fat_percent",
+                      "lean_body_mass",
+                      "total_body_water",
+                      "dry_lean_mass",
+                      "protein_mass",
+                      "mineral_mass",
+                      "bmi",
+                      "bmr",
+                      "visceral_fat_level",
+                      "visceral_fat_area",
+                      "ecw_tbw_ratio",
+                      "inbody_score",
+                      "waist_hip_ratio",
+                      "body_cell_mass"
+                    ]
+                  },
+                  "previous": {
+                    "type": "number"
+                  },
+                  "current": {
+                    "type": "number"
+                  },
+                  "delta": {
+                    "type": "number"
+                  },
+                  "delta_percent": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "direction": {
+                    "type": "string",
+                    "enum": [
+                      "up",
+                      "down",
+                      "flat"
+                    ]
+                  },
+                  "meaning": {
+                    "type": "string",
+                    "enum": [
+                      "improving",
+                      "neutral",
+                      "worsening",
+                      "within_normal_variation"
+                    ],
+                    "description": "Judged against the user's goal; small changes are within_normal_variation"
+                  }
+                },
+                "required": [
+                  "key",
+                  "previous",
+                  "current",
+                  "delta",
+                  "delta_percent",
+                  "direction",
+                  "meaning"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "summary": {
+              "type": "string",
+              "description": "One or two plain sentences"
+            }
+          },
+          "required": [
+            "previous_measured_at",
+            "items",
+            "summary"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "report": {
+      "type": "object",
+      "properties": {
+        "headline": {
+          "type": "string",
+          "description": "One honest, encouraging sentence, <= 20 words"
+        },
+        "score": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "label": {
+                  "type": "string",
+                  "description": "e.g. 'InBody score'"
+                },
+                "value": {
+                  "type": "number"
+                },
+                "max": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "label",
+                "value",
+                "max"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "insights": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "text": {
+                "type": "string",
+                "description": "<= 25 words, cites a specific number from the scan"
+              },
+              "sentiment": {
+                "type": "string",
+                "enum": [
+                  "positive",
+                  "neutral",
+                  "attention"
+                ]
+              },
+              "metric_keys": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "weight",
+                    "skeletal_muscle_mass",
+                    "body_fat_mass",
+                    "body_fat_percent",
+                    "lean_body_mass",
+                    "total_body_water",
+                    "dry_lean_mass",
+                    "protein_mass",
+                    "mineral_mass",
+                    "bmi",
+                    "bmr",
+                    "visceral_fat_level",
+                    "visceral_fat_area",
+                    "ecw_tbw_ratio",
+                    "inbody_score",
+                    "waist_hip_ratio",
+                    "body_cell_mass"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "text",
+              "sentiment",
+              "metric_keys"
+            ],
+            "additionalProperties": false
+          },
+          "description": "3 to 5 items"
+        },
+        "focus_areas": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "why": {
+                "type": "string",
+                "description": "Tied to a number from the scan or the profile"
+              },
+              "action": {
+                "type": "string",
+                "description": "One concrete thing to do this week"
+              },
+              "area": {
+                "type": "string",
+                "enum": [
+                  "training",
+                  "nutrition",
+                  "recovery",
+                  "lifestyle",
+                  "measurement"
+                ]
+              }
+            },
+            "required": [
+              "title",
+              "why",
+              "action",
+              "area"
+            ],
+            "additionalProperties": false
+          },
+          "description": "At most 3 items"
+        },
+        "coaching": {
+          "type": "object",
+          "properties": {
+            "training": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "0-4 short bullets"
+            },
+            "nutrition": {
+              "type": "object",
+              "properties": {
+                "protein_g_min": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "description": "grams per day"
+                },
+                "protein_g_max": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "description": "grams per day"
+                },
+                "calorie_guidance": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "A cautious range or direction, never below the BMR on the sheet"
+                },
+                "notes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "protein_g_min",
+                "protein_g_max",
+                "calorie_guidance",
+                "notes"
+              ],
+              "additionalProperties": false
+            },
+            "recovery": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "0-3 short bullets"
+            },
+            "next_scan": {
+              "type": "object",
+              "properties": {
+                "suggested_in_days": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "tips": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "How to get a comparable scan next time"
+                }
+              },
+              "required": [
+                "suggested_in_days",
+                "tips"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "training",
+            "nutrition",
+            "recovery",
+            "next_scan"
+          ],
+          "additionalProperties": false
+        },
+        "glossary": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "term": {
+                "type": "string"
+              },
+              "plain_meaning": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "term",
+              "plain_meaning"
+            ],
+            "additionalProperties": false
+          },
+          "description": "Only terms used in the text above"
+        }
+      },
+      "required": [
+        "headline",
+        "score",
+        "insights",
+        "focus_areas",
+        "coaching",
+        "glossary"
+      ],
+      "additionalProperties": false
+    },
+    "safety": {
+      "type": "object",
+      "properties": {
+        "referral_suggested": {
+          "type": "boolean"
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "coaching_limited": {
+          "type": "boolean",
+          "description": "true when profile flags mean no calorie or weight-loss guidance is given"
+        },
+        "limited_reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "referral_suggested",
+        "reason",
+        "coaching_limited",
+        "limited_reason"
+      ],
+      "additionalProperties": false
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "unreadable_field",
+              "math_mismatch",
+              "profile_mismatch",
+              "multiple_scans_mixed",
+              "glare",
+              "cropped",
+              "low_resolution",
+              "unit_ambiguity",
+              "date_ambiguity",
+              "not_inbody",
+              "other"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "metric_keys": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "weight",
+                "skeletal_muscle_mass",
+                "body_fat_mass",
+                "body_fat_percent",
+                "lean_body_mass",
+                "total_body_water",
+                "dry_lean_mass",
+                "protein_mass",
+                "mineral_mass",
+                "bmi",
+                "bmr",
+                "visceral_fat_level",
+                "visceral_fat_area",
+                "ecw_tbw_ratio",
+                "inbody_score",
+                "waist_hip_ratio",
+                "body_cell_mass"
+              ]
+            }
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "metric_keys"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "privacy": {
+      "type": "object",
+      "properties": {
+        "personal_data_seen": {
+          "type": "boolean",
+          "description": "true if a name, ID number, phone, email or facility name was visible. Never copied into any field."
+        }
+      },
+      "required": [
+        "personal_data_seen"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schema_version",
+    "status",
+    "user_message",
+    "scan",
+    "metrics",
+    "segments",
+    "balance",
+    "trend",
+    "report",
+    "safety",
+    "warnings",
+    "privacy"
+  ],
+  "additionalProperties": false,
+  "description": "GymBoy scan report v1. Produced by the AI from InBody printouts / app screenshots; rendered by the app."
+}

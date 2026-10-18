@@ -1,0 +1,385 @@
+/* GENERATED from ai/example-output.json by tools/sync-sample.js. Do not edit by hand.
+ * The sample report shown in demo mode, when the AI service is not connected. */
+(function (root) {
+  var GB = (root.GB = root.GB || {});
+  GB.sampleReport = {
+    "schema_version": "1.0",
+    "status": "ok",
+    "user_message": null,
+    "scan": {
+      "source_type": "inbody_printout",
+      "device_model": "InBody 570",
+      "measured_at": "2026-10-14T18:42:00",
+      "images_used": 2,
+      "units": {
+        "mass": "kg",
+        "length": "cm"
+      },
+      "person": {
+        "age": 32,
+        "sex": "male",
+        "height_cm": 178
+      },
+      "quality": {
+        "overall": "high",
+        "issues": []
+      }
+    },
+    "metrics": [
+      {
+        "key": "weight",
+        "label": "Weight",
+        "value": 82.4,
+        "unit": "kg",
+        "range_low": 65.4,
+        "range_high": 88.5,
+        "range_source": "printed",
+        "status": "within",
+        "confidence": "high",
+        "note": null
+      },
+      {
+        "key": "skeletal_muscle_mass",
+        "label": "Skeletal muscle mass",
+        "value": 38.1,
+        "unit": "kg",
+        "range_low": 33.4,
+        "range_high": 40.8,
+        "range_source": "printed",
+        "status": "within",
+        "confidence": "high",
+        "note": null
+      },
+      {
+        "key": "body_fat_mass",
+        "label": "Body fat mass",
+        "value": 15.9,
+        "unit": "kg",
+        "range_low": 7.6,
+        "range_high": 16.5,
+        "range_source": "printed",
+        "status": "within",
+        "confidence": "high",
+        "note": null
+      },
+      {
+        "key": "body_fat_percent",
+        "label": "Body fat",
+        "value": 19.3,
+        "unit": "%",
+        "range_low": 10,
+        "range_high": 20,
+        "range_source": "printed",
+        "status": "within",
+        "confidence": "high",
+        "note": null
+      },
+      {
+        "key": "lean_body_mass",
+        "label": "Lean body mass",
+        "value": 66.5,
+        "unit": "kg",
+        "range_low": null,
+        "range_high": null,
+        "range_source": "none",
+        "status": "unknown",
+        "confidence": "high",
+        "note": null
+      },
+      {
+        "key": "total_body_water",
+        "label": "Total body water",
+        "value": 48.6,
+        "unit": "kg",
+        "range_low": 41.9,
+        "range_high": 51.2,
+        "range_source": "printed",
+        "status": "within",
+        "confidence": "high",
+        "note": null
+      },
+      {
+        "key": "bmi",
+        "label": "BMI",
+        "value": 26,
+        "unit": "kg/m2",
+        "range_low": 18.5,
+        "range_high": 25,
+        "range_source": "printed",
+        "status": "above",
+        "confidence": "high",
+        "note": "BMI cannot tell muscle from fat"
+      },
+      {
+        "key": "bmr",
+        "label": "Basal metabolic rate",
+        "value": 1812,
+        "unit": "kcal",
+        "range_low": null,
+        "range_high": null,
+        "range_source": "none",
+        "status": "unknown",
+        "confidence": "high",
+        "note": null
+      },
+      {
+        "key": "visceral_fat_level",
+        "label": "Visceral fat level",
+        "value": 6,
+        "unit": "level",
+        "range_low": 1,
+        "range_high": 9,
+        "range_source": "printed",
+        "status": "within",
+        "confidence": "high",
+        "note": null
+      },
+      {
+        "key": "ecw_tbw_ratio",
+        "label": "ECW/TBW",
+        "value": 0.382,
+        "unit": "ratio",
+        "range_low": 0.36,
+        "range_high": 0.39,
+        "range_source": "printed",
+        "status": "within",
+        "confidence": "high",
+        "note": null
+      },
+      {
+        "key": "inbody_score",
+        "label": "InBody score",
+        "value": 78,
+        "unit": "points",
+        "range_low": null,
+        "range_high": null,
+        "range_source": "none",
+        "status": "unknown",
+        "confidence": "high",
+        "note": null
+      }
+    ],
+    "segments": {
+      "lean": {
+        "right_arm": {
+          "mass": 3.92,
+          "percent_of_ideal": 104.1,
+          "status": "normal"
+        },
+        "left_arm": {
+          "mass": 3.81,
+          "percent_of_ideal": 101.2,
+          "status": "normal"
+        },
+        "trunk": {
+          "mass": 29.6,
+          "percent_of_ideal": 103.5,
+          "status": "normal"
+        },
+        "right_leg": {
+          "mass": 10.12,
+          "percent_of_ideal": 98,
+          "status": "normal"
+        },
+        "left_leg": {
+          "mass": 9.83,
+          "percent_of_ideal": 95.2,
+          "status": "normal"
+        }
+      },
+      "fat": {
+        "right_arm": {
+          "mass": 0.9,
+          "percent_of_ideal": 98,
+          "status": "normal"
+        },
+        "left_arm": {
+          "mass": 0.9,
+          "percent_of_ideal": 97,
+          "status": "normal"
+        },
+        "trunk": {
+          "mass": 8.1,
+          "percent_of_ideal": 118,
+          "status": "above"
+        },
+        "right_leg": {
+          "mass": 2.4,
+          "percent_of_ideal": 95,
+          "status": "normal"
+        },
+        "left_leg": {
+          "mass": 2.4,
+          "percent_of_ideal": 96,
+          "status": "normal"
+        }
+      }
+    },
+    "balance": [
+      {
+        "pair": "arms",
+        "left_value": 3.81,
+        "right_value": 3.92,
+        "diff_percent": 2.8,
+        "flag": "none",
+        "note": null
+      },
+      {
+        "pair": "legs",
+        "left_value": 9.83,
+        "right_value": 10.12,
+        "diff_percent": 2.9,
+        "flag": "none",
+        "note": null
+      }
+    ],
+    "trend": {
+      "previous_measured_at": "2026-09-02",
+      "items": [
+        {
+          "key": "weight",
+          "previous": 84.1,
+          "current": 82.4,
+          "delta": -1.7,
+          "delta_percent": -2,
+          "direction": "down",
+          "meaning": "improving"
+        },
+        {
+          "key": "body_fat_percent",
+          "previous": 21,
+          "current": 19.3,
+          "delta": -1.7,
+          "delta_percent": -8.1,
+          "direction": "down",
+          "meaning": "improving"
+        },
+        {
+          "key": "skeletal_muscle_mass",
+          "previous": 37.4,
+          "current": 38.1,
+          "delta": 0.7,
+          "delta_percent": 1.9,
+          "direction": "up",
+          "meaning": "improving"
+        },
+        {
+          "key": "visceral_fat_level",
+          "previous": 7,
+          "current": 6,
+          "delta": -1,
+          "delta_percent": -14.3,
+          "direction": "down",
+          "meaning": "improving"
+        }
+      ],
+      "summary": "Six weeks on, weight and body fat are down while muscle is up. That is the pattern you want when losing fat."
+    },
+    "report": {
+      "headline": "Down 1.7 kg with muscle up 0.7 kg: a strong six weeks.",
+      "score": {
+        "label": "InBody score",
+        "value": 78,
+        "max": 100
+      },
+      "insights": [
+        {
+          "text": "Body fat fell from 21.0% to 19.3% while skeletal muscle rose to 38.1 kg: fat loss without losing muscle.",
+          "sentiment": "positive",
+          "metric_keys": [
+            "body_fat_percent",
+            "skeletal_muscle_mass"
+          ]
+        },
+        {
+          "text": "Visceral fat level is 6, inside the healthy 1 to 9 band and one lower than last time.",
+          "sentiment": "positive",
+          "metric_keys": [
+            "visceral_fat_level"
+          ]
+        },
+        {
+          "text": "BMI reads 26.0, slightly above its band, but it cannot tell muscle from fat. Your 19.3% body fat is the better guide.",
+          "sentiment": "neutral",
+          "metric_keys": [
+            "bmi",
+            "body_fat_percent"
+          ]
+        },
+        {
+          "text": "Left leg lean mass is 95% of normal against 98% on the right. A small gap, worth keeping an eye on.",
+          "sentiment": "attention",
+          "metric_keys": []
+        }
+      ],
+      "focus_areas": [
+        {
+          "title": "Even out the legs",
+          "why": "Left leg lean mass is 95% of normal versus 98% on the right.",
+          "action": "Add one single-leg exercise (split squats, 3 x 8 each side) to your leg day.",
+          "area": "training"
+        },
+        {
+          "title": "Keep protein steady",
+          "why": "Muscle rose while fat fell, which needs enough protein.",
+          "action": "Aim for 130 to 180 g of protein a day across 3 or 4 meals.",
+          "area": "nutrition"
+        },
+        {
+          "title": "Scan under the same conditions",
+          "why": "Water balance moves the numbers a little from day to day.",
+          "action": "Next scan: same time of day, two hours after eating, no hard workout beforehand.",
+          "area": "measurement"
+        }
+      ],
+      "coaching": {
+        "training": [
+          "Keep three lifting days a week and add weight to the main lifts in small steps.",
+          "Add one single-leg exercise to even out the small left and right gap."
+        ],
+        "nutrition": {
+          "protein_g_min": 130,
+          "protein_g_max": 180,
+          "calorie_guidance": "Your BMR is 1,812 kcal. For gentle fat loss stay roughly 10 to 15% under maintenance, and never below the BMR.",
+          "notes": [
+            "Adjust after two to three weeks, based on how your weekly average weight is moving."
+          ]
+        },
+        "recovery": [
+          "Aim for 7 to 9 hours of sleep; it helps you keep muscle while losing fat."
+        ],
+        "next_scan": {
+          "suggested_in_days": 28,
+          "tips": [
+            "Same time of day, similar hydration, and no hard training in the 12 hours before."
+          ]
+        }
+      },
+      "glossary": [
+        {
+          "term": "Skeletal muscle mass",
+          "plain_meaning": "The muscle attached to your bones, the part you train."
+        },
+        {
+          "term": "Visceral fat",
+          "plain_meaning": "Fat stored around your organs. Lower levels are healthier."
+        },
+        {
+          "term": "BMI",
+          "plain_meaning": "Weight relative to height. It cannot tell muscle from fat."
+        }
+      ]
+    },
+    "safety": {
+      "referral_suggested": false,
+      "reason": null,
+      "coaching_limited": false,
+      "limited_reason": null
+    },
+    "warnings": [],
+    "privacy": {
+      "personal_data_seen": true
+    }
+  };
+  if (typeof module !== "undefined" && module.exports) module.exports = GB.sampleReport;
+})(typeof window !== "undefined" ? window : globalThis);

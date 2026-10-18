@@ -1,0 +1,19 @@
+{
+  "name": "gymboy",
+  "version": "0.2.0",
+  "private": true,
+  "description": "GymBoy: workout logger with accounts, onboarding and AI InBody scan reports",
+  "scripts": {
+    "dev": "node server.js",
+    "test": "node tests/voice.test.js && node tests/howto-flows.test.js && node tests/scan-report.test.js && node tests/scan-validate.test.js && node tests/analyze-scan.test.js && node tests/profile-utils.test.js && node tests/sample-report.test.js && node tests/backend-supabase.test.js && node tests/backend-local.test.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.135.0"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@supabase/supabase-js": "^2.45.4"
+  }
+}

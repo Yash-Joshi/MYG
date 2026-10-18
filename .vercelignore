@@ -1,0 +1,7 @@
+# Not needed on the live site (the API functions use api/, lib/ and ai/, so those stay)
+tests
+tools
+node_modules
+.env
+.env.*
+README.md
