@@ -1,4 +1,5 @@
 {
+  "framework": null,
   "functions": {
     "api/analyze-scan.js": { "maxDuration": 60, "includeFiles": "ai/**" },
     "api/config.js": { "maxDuration": 10 }
