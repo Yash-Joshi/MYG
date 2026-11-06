@@ -23,11 +23,15 @@
   const restEl = document.getElementById('rest');
 
   let viewTimers = [];
+  let sessionCtx = null; // the open workout screen, so a partner's new exercise can appear in it
   const historyOpen = new Set(); // expanded history cards
   let historyLimit = 20;
   let currentExId = null; // the exercise you touched last (for "ten reps" with no name)
 
-  const saveActive = () => store.saveActive(state.active);
+  const saveActive = () => {
+    store.saveActive(state.active);
+    if (state.active && state.active.pair && GB.pairUI) GB.pairUI.changed(); // keeps the partner's live view current
+  };
   const saveSettings = () => store.saveSettings(state.settings);
 
   /* =====================================================================
@@ -135,7 +139,7 @@
     });
   }
 
-  function startSession(day, template, push) {
+  function startSession(day, template, push, extra) {
     state.active = {
       id: U.uid(),
       dayId: day.id,
@@ -148,6 +152,7 @@
     if (template) {
       state.active.exercises = template.map((ex) => makeExercise(ex.name, ex.muscle, ex.sets.length));
     }
+    if (extra) Object.assign(state.active, extra); // e.g. { pair: {...} } for a pair workout
     saveActive();
     go('session', !push);
   }
@@ -155,8 +160,8 @@
   /* =====================================================================
    * Router
    * ===================================================================== */
-  const ROUTES = ['home', 'workout', 'start', 'session', 'history', 'progress', 'scan', 'report', 'welcome', 'onboarding'];
-  const TAB_ROUTES = ['home', 'workout', 'scan', 'history', 'progress'];
+  const ROUTES = ['home', 'workout', 'start', 'session', 'history', 'progress', 'scan', 'report', 'welcome', 'onboarding', 'pair'];
+  const TAB_ROUTES = ['home', 'workout', 'pair', 'scan', 'history', 'progress'];
 
   // 'report/abc123' -> { name: 'report', param: 'abc123' }
   const parseRoute = (str) => {
@@ -183,7 +188,7 @@
   // the device. Only the AI scan reports (which call the paid analysis service and store a profile)
   // ask for a profile, and for a sign-in once the account service is connected. The server checks
   // the sign-in again on every scan request; this gate is only there to guide people.
-  const OPEN_ROUTES = ['home', 'workout', 'start', 'session', 'history', 'progress'];
+  const OPEN_ROUTES = ['home', 'workout', 'start', 'session', 'history', 'progress', 'pair'];
 
   // Where you were headed before being sent to set up an account, so you land back there.
   let returnTo = null;
@@ -230,6 +235,7 @@
   function render() {
     viewTimers.forEach(clearInterval);
     viewTimers = [];
+    sessionCtx = null;
 
     const gate = accountGate(currentRoute());
     if (gate && gate !== currentRoute()) {
@@ -263,6 +269,7 @@
     tabsEl.append(
       tab('home', 'Home', 'home'),
       tab('workout', 'Workout', 'bolt'),
+      tab('pair', 'Pair', 'users'),
       tab('scan', 'Scan', 'camera'),
       tab('history', 'History', 'history'),
       tab('progress', 'Progress', 'chart')
@@ -476,7 +483,9 @@
   /* =====================================================================
    * Session (the logger)
    * ===================================================================== */
-  function discardSession() {
+  // keepPair: the workout was finished, not abandoned, so the partner connection stays open for the result.
+  function discardSession(keepPair) {
+    if (!keepPair && state.active && state.active.pair && GB.pairUI) GB.pairUI.discarded();
     state.active = null;
     saveActive();
     stopRest();
@@ -555,6 +564,7 @@
     }
 
     ctx.refreshList();
+    sessionCtx = ctx;
 
     ctx.openPicker = openPicker;
     return h(
@@ -570,6 +580,7 @@
         h('button', { class: 'btn primary small', type: 'button', onclick: openFinish }, 'Finish')
       ),
       h('div', { class: 'stats slim' }, h('div', { class: 'stat' }, sExercises, h('span', null, 'Exercises')), h('div', { class: 'stat' }, sSets, h('span', null, 'Sets done')), h('div', { class: 'stat' }, sThird, h('span', null, timedDay ? 'Work time' : `Volume (${a.unit})`))),
+      GB.pairUI ? GB.pairUI.bar() : null,
       hiitDay ? h('button', { class: 'btn soft iv-launch', type: 'button', onclick: () => openIntervalTimer(ctx) }, icon('timer', 20), 'Interval timer') : null,
       mobilityDay ? h('button', { class: 'btn soft iv-launch', type: 'button', onclick: () => openFlows(ctx) }, icon('flow', 20), 'Guided flows') : null,
       list
@@ -1170,6 +1181,41 @@
       .filter((ex) => ex.sets.length);
   }
 
+  /* ---------- pair workouts: what the partner's screens need from the logger ---------- */
+  function pairSnapshot() {
+    const a = state.active;
+    return GB.pair.summarize(collectExercises(a, false), a.unit);
+  }
+
+  // Show a partner's new exercise in the open workout, but never while you are typing in it.
+  function refreshSessionView(tries) {
+    if (!sessionCtx || currentRoute() !== 'session') return;
+    const el = document.activeElement;
+    if (el && viewEl.contains(el) && /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) {
+      if ((tries || 0) < 10) setTimeout(() => refreshSessionView((tries || 0) + 1), 1500);
+      return;
+    }
+    sessionCtx.refreshList();
+  }
+
+  // Exercises the partner added that you do not have yet. Returns how many were added.
+  function addPartnerExercises(list) {
+    const a = state.active;
+    if (!a) return 0;
+    let n = 0;
+    list.forEach((e) => {
+      if (a.exercises.some((x) => U.keyOf(x.name) === U.keyOf(e.name))) return;
+      const muscle = MUSCLES[e.muscle] ? e.muscle : (a.muscles && a.muscles[0]) || 'chest';
+      a.exercises.push(makeExercise(e.name, muscle, e.sets));
+      n += 1;
+    });
+    if (n) {
+      saveActive();
+      refreshSessionView();
+    }
+    return n;
+  }
+
   function saveSession(includePending) {
     const a = state.active;
     const exercises = collectExercises(a, includePending);
@@ -1207,14 +1253,18 @@
       unit: a.unit,
       exercises,
     };
+    if (a.pair && a.pair.peerName) session.with = a.pair.peerName;
+    const withPartner = !!(a.pair && a.pair.peerId && GB.pairUI);
     state.sessions.push(session);
     store.saveSessions(state.sessions);
-    discardSession();
+    if (withPartner) GB.pairUI.finished(session); // send your final numbers; the line stays open for the result
+    discardSession(withPartner);
     historyOpen.clear();
     historyOpen.add(session.id);
     historyLimit = 20;
     go('history', true);
     toast(prs ? `Workout saved · ${prs} new PR${prs === 1 ? '' : 's'}!` : 'Workout saved', 'success');
+    if (withPartner) GB.pairUI.showResult(session);
   }
 
   /* =====================================================================
@@ -1275,7 +1325,7 @@
             redraw();
           },
         },
-        h('span', { class: 'hh-main' }, h('b', null, s.dayName), h('small', null, U.fmtDate(s.endedAt, { weekday: 'long', day: 'numeric', month: 'short' }))),
+        h('span', { class: 'hh-main' }, h('b', null, s.dayName), h('small', null, U.fmtDate(s.endedAt, { weekday: 'long', day: 'numeric', month: 'short' }) + (s.with ? ` · with ${s.with}` : ''))),
         h(
           'span',
           { class: 'hh-meta' },
@@ -2613,10 +2663,12 @@
     );
   }
 
-  function startRest() {
+  // opts.endsAt: a rest your pair partner started (so it is not sent back to them).
+  function startRest(opts) {
     if (!state.settings.restOn) return;
-    rest.total = state.settings.restSec;
-    rest.end = Date.now() + rest.total * 1000;
+    const shared = !!(opts && opts.endsAt);
+    rest.total = shared ? opts.total : state.settings.restSec;
+    rest.end = shared ? opts.endsAt : Date.now() + rest.total * 1000;
     rest.finished = false;
     restEl.classList.remove('over');
     restEl.hidden = false;
@@ -2624,6 +2676,15 @@
     clearInterval(rest.iv);
     rest.iv = setInterval(restTick, 250);
     restTick();
+    if (!shared && state.active && state.active.pair && GB.pairUI) GB.pairUI.restStarted(rest.total, rest.end);
+  }
+
+  // Your partner ticked a set: start the same rest here, unless you are already resting.
+  function startPairRest(total, endsAt) {
+    if (rest.iv && !rest.finished) return;
+    const secs = Math.min(total, Math.round((endsAt - Date.now()) / 1000)); // phone clocks can differ a little
+    if (secs < 3) return;
+    startRest({ total: secs, endsAt: Date.now() + secs * 1000 });
   }
 
   function stopRest() {
@@ -2733,6 +2794,7 @@
       updateWake();
       if (document.visibilityState === 'visible' && rest.iv) restTick();
     });
+    if (GB.pairUI) GB.pairUI.boot(); // pick a pair workout back up after a reload
     render();
     try {
       if (hashRoute() !== routeState) location.replace('#/' + routeState);
@@ -2747,7 +2809,7 @@
   }
 
   // What the screens in other files need from the shell.
-  GB.app = { go, render, state, startSession, takeReturn, plural, openSettings, settingsButton, pageHeader, statTile, fmtBig, tone, buzz, unlockAudio, logTimed, showHowTo, extrasApi };
+  GB.app = { go, render, state, startSession, takeReturn, saveActive, saveSettings, pairSnapshot, addPartnerExercises, startPairRest, plural, openSettings, settingsButton, pageHeader, statTile, fmtBig, tone, buzz, unlockAudio, logTimed, showHowTo, extrasApi };
 
   init().catch((e) => console.error('GymBoy failed to start', e));
 })((window.GB = window.GB || {}));

@@ -37,6 +37,7 @@
     const when = session.endedAt || Date.now();
     const subtitle = [U.fmtDate(when, { weekday: 'long', day: 'numeric', month: 'long' })];
     if (minutes > 0) subtitle.push(U.fmtMinutes(minutes));
+    if (session.with) subtitle.push(`with ${String(session.with).slice(0, 24)}`);
 
     return {
       title: session.dayName || 'Workout',

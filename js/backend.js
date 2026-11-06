@@ -13,7 +13,7 @@
   const GB = (root.GB = root.GB || {});
 
   const KEYS = { user: 'gymboy.user', profile: 'gymboy.profile', scans: 'gymboy.scans' };
-  const SUPABASE_JS = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js';
+  const SUPABASE_JS = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.109.0/dist/umd/supabase.js';
 
   let cfg = { supabaseUrl: null, supabaseAnonKey: null, ai: false, aiMock: false };
   let mode = 'local';
@@ -263,8 +263,16 @@
     return { ok: false, error: code || 'failed', message: (json && json.message) || 'Something went wrong. Please try again.' };
   }
 
+  // Live channels (Supabase Realtime Broadcast), used by pair workouts. Null until accounts are connected.
+  const realtime = {
+    get available() { return mode === 'supabase' && !!sb; },
+    channel: (name) => (mode === 'supabase' && sb ? sb.channel(name, { config: { broadcast: { self: false, ack: false } } }) : null),
+    remove: (ch) => { try { if (sb) sb.removeChannel(ch); } catch (e) { /* already gone */ } },
+  };
+
   GB.backend = {
     init,
+    realtime,
     get mode() { return mode; },
     get config() { return cfg; },
     get lastError() { return lastError; },

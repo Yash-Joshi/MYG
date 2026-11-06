@@ -3820,3 +3820,250 @@ body.has-tabs .rest {
   width: 52px;
   padding: 0;
 }
+
+/* ---------- pair workouts ---------- */
+
+.pair-page .card {
+  margin-bottom: 14px;
+}
+
+.pair-page .field,
+.pair-page .select {
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.pair-page .btn.big {
+  width: 100%;
+  margin-top: 4px;
+}
+
+.pair-page .btn.ghost {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.pair-intro {
+  margin-bottom: 14px;
+}
+
+.pair-fine {
+  margin: 4px 2px 16px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.card-title {
+  margin-bottom: 12px;
+  font-size: 19px;
+  font-weight: 800;
+}
+
+.notice {
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  border: 1.5px dashed var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.code-field {
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-align: center;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+
+/* the strip under a workout's header */
+.pair-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin: 0 0 12px;
+  padding: 10px 14px;
+  border: 1.5px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--text);
+  text-align: left;
+}
+
+.pb-dot {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+
+.pb-dot.ok {
+  background: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+
+.pb-dot.wait {
+  background: var(--warn);
+}
+
+.pb-dot.bad {
+  background: var(--danger);
+}
+
+.pb-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.pb-text b {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.pb-text small,
+.ps-status small {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.pair-bar > svg {
+  flex: none;
+  color: var(--muted);
+  transform: rotate(-90deg);
+}
+
+/* the pair sheet */
+.pair-sheet > * + * {
+  margin-top: 12px;
+}
+
+.ps-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ps-status b {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.ps-code {
+  padding: 16px 8px;
+  border-radius: 16px;
+  background: var(--surface-2);
+  font-size: 40px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  user-select: all;
+}
+
+.ps-hint {
+  font-size: 14px;
+  text-align: center;
+}
+
+.ps-leave {
+  width: 100%;
+  margin-top: 20px;
+}
+
+/* the scoreboard */
+.sb-head {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.sb-row {
+  margin-bottom: 14px;
+}
+
+.sb-vals {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.sb-vals small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.sb-v {
+  min-width: 3ch;
+  font-size: 26px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
+.sb-vals .sb-v:last-child {
+  text-align: right;
+}
+
+.sb-v.lead {
+  color: var(--accent-text);
+}
+
+.sb-bar {
+  height: 8px;
+  margin-top: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--surface-2);
+}
+
+.sb-bar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+  transition: width 0.3s ease;
+}
+
+/* cheers */
+.nudges {
+  display: flex;
+  gap: 10px;
+}
+
+.nudge-btn {
+  flex: 1;
+  height: 54px;
+  border: 1.5px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface-2);
+  font-size: 26px;
+}
+
+.nudge-btn:active {
+  transform: scale(0.94);
+}
+
+/* the result after a pair workout */
+.pr-verdict {
+  padding: 8px 0 4px;
+  text-align: center;
+}
+
+.pr-verdict h2 {
+  font-size: 32px;
+  font-weight: 900;
+  color: var(--accent-text);
+}

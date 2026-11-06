@@ -21,6 +21,7 @@
     ivRounds: 8,
     voiceAuto: false, // quick log: add the set without the confirm tap
     flowSpeak: false, // guided flows: read the next move aloud
+    pairName: '', // the name a pair partner sees
   };
 
   let warned = false;

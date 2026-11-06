@@ -1,6 +1,6 @@
 /* GymBoy service worker – makes the app load instantly and work offline in the gym.
  * Bump CACHE whenever you change any file below so phones pick up the update. */
-const CACHE = 'gymboy-v8';
+const CACHE = 'gymboy-v9';
 const ASSETS = [
   './',
   'index.html',
@@ -16,6 +16,8 @@ const ASSETS = [
   'js/flow-data.js',
   'js/flows.js',
   'js/share.js',
+  'js/pair.js',
+  'js/screens-pair.js',
   'js/voice.js',
   'js/profile-utils.js',
   'js/sample-report.js',

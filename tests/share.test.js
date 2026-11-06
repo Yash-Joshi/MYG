@@ -70,6 +70,12 @@ test('a timed day shows work time instead of volume, with no weight unit on the 
   assert.deepStrictEqual(m.rows[0].pills, [{ text: '60s', count: 2 }]);
 });
 
+test('a pair workout says who you trained with', () => {
+  const m = S.model(Object.assign({}, lift, { with: 'Sam' }));
+  assert.ok(m.subtitle.endsWith('with Sam'), m.subtitle);
+  assert.ok(!S.model(lift).subtitle.includes('with'));
+});
+
 test('pounds are labelled as pounds', () => {
   const m = S.model(Object.assign({}, lift, { unit: 'lb' }));
   assert.strictEqual(m.tiles[2].label, 'Volume (lb)');

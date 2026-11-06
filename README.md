@@ -28,6 +28,7 @@ Plain HTML, CSS and JavaScript on the front end (no build step). The AI call and
 - **How to do every exercise** – tap **ⓘ** on any exercise (on the card, in the picker, or in the ⋯ menu) for numbered steps, key cues, common mistakes, an easier and a harder version, and a suggested dose. **Watch a demo** opens a YouTube search for that exercise (a search never goes stale, unlike a saved video link). You can add your own **note and video link** to any exercise; they're saved on your device and included in backups.
 - **Quick log by voice or typing** – tap the lime mic button, then say or type a set: *"bench press sixty kilos eight reps"*, *"ten reps"*, *"burpees forty seconds"*. The mic button needs HTTPS; the text box works anywhere (and your phone keyboard's mic can dictate into it). No audio is stored.
 - **Log sets** – weight, reps, tick when done; last time's numbers shown as suggestions; rest timer; notes; screen stays awake.
+- **Train with a partner (the Pair tab)** – two people, one workout, two phones. One person picks the day and taps **Start and invite a partner**, which gives a 6-character code (and an invite link to send on WhatsApp); the other opens the **Pair** tab and enters it. You each log your own sets on your own phone. You see each other's progress live, new exercises either of you adds appear on both phones, a set ticked by either of you starts the rest timer for both, you can send cheers (💪 🔥 👏 ⏱️), and when you finish a **scoreboard** shows who lifted more (work time on a timed day). Each workout is saved to your own history, tagged "with Sam". Leaving, or losing signal, never loses your workout; it keeps working on its own, and the session picks itself back up when the connection returns or the app is reopened. No account is needed. **Try it alone first:** *Try with a practice partner* adds a pretend partner that logs sets every few seconds.
 - **Share as a picture** – tap **Share** on any workout in History (or ⋯ → *Share as picture* during a workout) for a clean 1080-wide image: the day, date, time, sets and volume, then every exercise with its sets. On a phone the **Share** button opens the system share sheet, so it goes straight to WhatsApp, Telegram, Messages or anything else; elsewhere you can **Save** or **Copy** it and paste it into a chat. It is drawn on the device (nothing is uploaded) and shows only the workout: no name or account details. Needs HTTPS (the live site) for the system share sheet.
 - **History**, **Progress** (best set and trend per exercise, PRs), repeat any workout, **backup / restore**, kg / lb.
 - **Demo data** – Settings → *Load 40-day demo data* adds a dummy lifter's workouts **and weigh-ins** (tagged, removable) so every screen has something to show.
@@ -57,6 +58,16 @@ You need two accounts. Neither is possible for me to create or fill in for you; 
 
 ### 2. Anthropic (the AI)
 Create an API key at <https://console.anthropic.com>. The default model is `claude-opus-5-5`; `claude-sonnet-5-5` costs less. Try both on your own sample scans before choosing (see `ai/scan-report-prompt.md`, section 5).
+
+### Pair workouts need nothing more than step 1
+
+Pair sessions use **Supabase Realtime Broadcast**, which is on by default in every project and needs **no tables and no extra keys**: the same `SUPABASE_URL` and `SUPABASE_ANON_KEY` are enough. Without them the Pair tab still works with the practice partner, but two real phones cannot connect (the page says so).
+
+How it is protected, and what to know:
+- A room is a channel named after its code. The app talks to it with the project's **public** key, so anyone who knows a code can listen in. Only a first name, exercise names, the labels of ticked sets (like `60×8`) and three totals travel over it; never a profile, email or scan.
+- The code is 6 characters from a 31-letter alphabet (about 887 million combinations) and the host's session accepts exactly **one** partner; a third person is told the session is full. Everything received is length-checked and only ever shown as text.
+- If rooms ever carried anything more sensitive, the next step is Supabase **private channels** (sign-in plus row-level rules on `realtime.messages`).
+- Supabase's free plan allows 200 simultaneous Realtime connections and 100 messages a second across the project, far more than pairs of lifters need; the app sends at most a few small messages a second per person.
 
 ### 3. Deploy on Vercel
 1. Push this folder to a Git repository and import it in Vercel. Framework preset **Other**, no build command.
@@ -100,6 +111,8 @@ GYMBOY/
 │   ├── flow-data.js       the guided flows as plain data  ← edit to add or change flows
 │   ├── flows.js           flow picker, detail and the guided player
 │   ├── share.js           the shareable workout picture (canvas) and its Share / Save / Copy sheet
+│   ├── pair.js            pair workouts: room codes, the two-person protocol, scoreboard, Realtime transport, practice partner (no DOM; tested)
+│   ├── screens-pair.js    the Pair tab, the bar inside a workout, the scoreboard sheet and the result
 │   ├── profile-utils.js   age, BMI, units, goal progress, gauge maths (pure, tested)
 │   ├── backend.js         accounts, profile and scan storage: local mode or Supabase, one interface
 │   ├── screens-account.js welcome + onboarding
@@ -119,9 +132,9 @@ GYMBOY/
 npm test
 ```
 
-Ten suites (about 190 checks): the voice parser, the how-to and flow content (every exercise has instructions, every flow move exists), the report schema and example, the output checker, the analysis function (using the real Anthropic SDK against a fake server, so the exact request is inspected), profile maths, the sample report staying in sync, the Supabase code path (using the real Supabase client against a fake server), and the content of the shareable workout picture.
+Twelve suites (about 225 checks): the voice parser, the how-to and flow content (every exercise has instructions, every flow move exists), the report schema and example, the output checker, the analysis function (using the real Anthropic SDK against a fake server, so the exact request is inspected), profile maths, the sample report staying in sync, the Supabase code path (using the real Supabase client against a fake server), the content of the shareable workout picture, the pair-workout protocol (join, full room, live numbers, shared plan and rest timer, reconnect, practice partner), and pair sessions over the **real** Supabase client against a fake Realtime server.
 
-What they **cannot** prove: that Claude reads a real InBody sheet correctly, or that a live Supabase project behaves as expected. Run a handful of real scans first (`ai/scan-report-prompt.md`, section 5).
+What they **cannot** prove: that Claude reads a real InBody sheet correctly, or that a live Supabase project (sign-in, database rules, Realtime) behaves as expected. Pair workouts in particular have been exercised only with the practice partner, two browser tabs and the fake Realtime server, not between two real phones on a real project. Run a handful of real scans first (`ai/scan-report-prompt.md`, section 5).
 
 ## Known limits
 
