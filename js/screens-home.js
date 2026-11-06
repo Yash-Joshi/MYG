@@ -116,6 +116,38 @@
     });
   }
 
+  /* ---------- today's workout: always first, one tap from logging ---------- */
+  // The days you train most, so your usual one is a single tap away.
+  function favouriteDays(sessions, n) {
+    const days = GB.data.DAY_TYPES;
+    const counts = {};
+    sessions.forEach((x) => (counts[x.dayId] = (counts[x.dayId] || 0) + 1));
+    return days
+      .map((d, i) => ({ d, i, c: counts[d.id] || 0 }))
+      .sort((a, z) => z.c - a.c || a.i - z.i)
+      .slice(0, n)
+      .map((x) => x.d);
+  }
+
+  function workoutCard(app) {
+    const state = app.state;
+    if (state.active) {
+      return h('section', { class: 'card hero live' }, h('p', { class: 'eyebrow' }, h('i', { class: 'pulse' }), 'Workout in progress'), h('h2', null, state.active.dayName), h('button', { class: 'btn primary big', type: 'button', onclick: () => app.go('session') }, 'Resume workout'));
+    }
+    const weekStart = U.startOfWeek(Date.now());
+    const week = state.sessions.filter((s) => s.endedAt >= weekStart).length;
+    const lastSession = state.sessions.slice().sort((x, y) => y.endedAt - x.endedAt)[0];
+    const chips = favouriteDays(state.sessions, 6).map((d) => h('button', { class: 'chip qs', type: 'button', onclick: () => app.startSession(d) }, d.name));
+    chips.push(h('button', { class: 'chip qs more', type: 'button', onclick: () => app.go('start') }, 'All days'));
+    return h(
+      'section',
+      { class: 'card wk-card quick' },
+      h('div', { class: 'wk-text' }, h('h2', null, 'Ready to train?'), h('p', { class: 'muted' }, week ? `${app.plural(week, 'workout')} this week` : 'No workouts yet this week', lastSession ? ` · last: ${lastSession.dayName}` : '')),
+      h('p', { class: 'eyebrow' }, 'Tap a day to start logging'),
+      h('div', { class: 'chips wrap qs-row' }, chips)
+    );
+  }
+
   /* =====================================================================
    * Home
    * ===================================================================== */
@@ -126,6 +158,27 @@
     const user = b.user();
     const scans = b.scans();
     const state = app.state;
+    const wkCard = workoutCard(app);
+
+    // No profile yet: Home is just the workout, with an invitation to set one up (never a blocker).
+    if (!profile) {
+      const supa = b.mode === 'supabase';
+      return h(
+        'div',
+        { class: 'page home2' },
+        h('header', { class: 'page-head home-head' }, h('div', { class: 'hello' }, h('small', null, P.greeting()), h('b', null, P.firstName(user && user.name) || 'Welcome')), app.settingsButton()),
+        wkCard,
+        h(
+          'section',
+          { class: 'card scan-cta' },
+          h('span', { class: 'sc-ico big' }, icon('camera', 34)),
+          h('h2', null, 'Get your body report'),
+          h('p', { class: 'muted' }, (supa ? 'Sign in and answer a few questions' : 'Answer a few questions') + ' to see your weight trend and BMI, and to turn an InBody result photo into a visual report. Takes about two minutes. Logging workouts never needs it.'),
+          h('button', { class: 'btn primary big', type: 'button', onclick: () => app.go(supa && !b.isSignedIn() ? 'welcome' : 'onboarding') }, icon('user', 22), supa && !b.isSignedIn() ? 'Sign in or set up' : 'Set up my profile')
+        )
+      );
+    }
+
     const imperial = profile.units === 'imperial';
     const unit = imperial ? 'lb' : 'kg';
     const dispW = (kg) => (imperial ? P.kgToLb(kg) : kg);
@@ -199,19 +252,6 @@
       );
     }
 
-    /* --- today's workout --- */
-    const weekStart = U.startOfWeek(Date.now());
-    const week = state.sessions.filter((s) => s.endedAt >= weekStart).length;
-    const lastSession = state.sessions.slice().sort((x, y) => y.endedAt - x.endedAt)[0];
-    const workoutCard = state.active
-      ? h('section', { class: 'card hero live' }, h('p', { class: 'eyebrow' }, h('i', { class: 'pulse' }), 'Workout in progress'), h('h2', null, state.active.dayName), h('button', { class: 'btn primary big', type: 'button', onclick: () => app.go('session') }, 'Resume workout'))
-      : h(
-          'section',
-          { class: 'card wk-card' },
-          h('div', { class: 'wk-text' }, h('h2', null, 'Ready to train?'), h('p', { class: 'muted' }, week ? `${app.plural(week, 'workout')} this week` : 'No workouts yet this week', lastSession ? ` · last: ${lastSession.dayName}` : '')),
-          h('button', { class: 'btn primary', type: 'button', onclick: () => app.go('start') }, icon('bolt', 20), 'Start')
-        );
-
     /* --- one thing worth knowing --- */
     let insight = null;
     if (latest && latest.report && latest.report.report && latest.report.report.insights && latest.report.report.insights.length) {
@@ -227,9 +267,9 @@
       'div',
       { class: 'page home2' },
       h('header', { class: 'page-head home-head' }, h('div', { class: 'hello' }, h('small', null, P.greeting()), h('b', null, P.firstName(profile.name || (user && user.name)) || 'Welcome')), app.settingsButton()),
+      wkCard,
       hero,
       scanCard,
-      workoutCard,
       insight
     );
   };

@@ -179,13 +179,39 @@
   const currentRoute = () => parseRoute(routeState).name;
   const routeParam = () => parseRoute(routeState).param;
 
+  // Logging workouts never needs an account: those screens are always open, and workouts live on
+  // the device. Only the AI scan reports (which call the paid analysis service and store a profile)
+  // ask for a profile, and for a sign-in once the account service is connected. The server checks
+  // the sign-in again on every scan request; this gate is only there to guide people.
+  const OPEN_ROUTES = ['home', 'workout', 'start', 'session', 'history', 'progress'];
+
+  // Where you were headed before being sent to set up an account, so you land back there.
+  let returnTo = null;
+  function takeReturn() {
+    const r = returnTo;
+    returnTo = null;
+    return r;
+  }
+
   // Where the account state says you must be (null = stay where you are).
   function accountGate(r) {
     const b = GB.backend;
     if (!b) return null;
-    if (!b.isSignedIn()) return r === 'welcome' ? null : 'welcome';
-    if (!b.hasProfile()) return r === 'onboarding' ? null : 'onboarding';
-    if (r === 'welcome') return 'home';
+    if (OPEN_ROUTES.includes(r)) {
+      returnTo = null;
+      return null;
+    }
+    const needsSignIn = b.mode === 'supabase' && !b.isSignedIn();
+    if (r === 'welcome') return needsSignIn ? null : 'home';
+    if (needsSignIn) {
+      returnTo = routeState;
+      return 'welcome';
+    }
+    if (r === 'onboarding') return null;
+    if (!b.hasProfile()) {
+      returnTo = routeState;
+      return 'onboarding';
+    }
     return null;
   }
 
@@ -206,7 +232,10 @@
     viewTimers = [];
 
     const gate = accountGate(currentRoute());
-    if (gate && gate !== currentRoute()) return go(gate, true);
+    if (gate && gate !== currentRoute()) {
+      if (returnTo) toast(gate === 'welcome' ? 'Sign in to use scan reports. Workouts never need an account.' : 'Quick setup first, then your scan.');
+      return go(gate, true);
+    }
 
     const r = currentRoute();
     if (r === 'session' && !state.active) return go('workout', true);
@@ -2178,7 +2207,35 @@
   // Who is signed in, and the account actions (the account itself lives in js/backend.js).
   function accountSection() {
     const b = GB.backend;
-    if (!b || !b.isSignedIn()) return null;
+    if (!b) return null;
+    if (!b.isSignedIn()) {
+      const supa = b.mode === 'supabase';
+      const p = b.profile();
+      return h(
+        'div',
+        { class: 'acct' },
+        h(
+          'div',
+          { class: 'acct-who' },
+          h('span', { class: 'avatar' }, icon('user', 18)),
+          h('span', { class: 'sd' }, h('b', null, supa ? 'Not signed in' : (p && p.name) || 'Guest'), h('small', null, 'Your workouts stay on this device'))
+        ),
+        h('p', { class: 'acct-note' }, supa ? 'Sign in to use AI scan reports. Logging workouts never needs an account.' : 'Set up a profile to see your body stats and use AI scan reports. Logging workouts never needs one.'),
+        h(
+          'button',
+          {
+            class: 'btn soft',
+            type: 'button',
+            onclick: () => {
+              closeAllSheets();
+              go(supa ? 'welcome' : p ? 'onboarding/edit' : 'onboarding');
+            },
+          },
+          icon('user', 18),
+          supa ? 'Sign in or create account' : p ? 'Edit profile' : 'Set up profile'
+        )
+      );
+    }
     const u = b.user();
     const p = b.profile();
     return h(
@@ -2215,7 +2272,7 @@
             onclick: async () => {
               await b.signOut();
               closeAllSheets();
-              go('welcome', true);
+              go('home', true);
             },
           },
           icon('logout', 18),
@@ -2645,7 +2702,7 @@
         await GB.backend.init();
       } catch (e) { /* stay in whatever state we have */ }
       GB.backend.onChange((ev) => {
-        if (ev === 'signed_out') go('welcome', true);
+        if (ev === 'signed_out') go('home', true);
       });
     }
 
@@ -2678,7 +2735,7 @@
   }
 
   // What the screens in other files need from the shell.
-  GB.app = { go, render, state, plural, openSettings, settingsButton, pageHeader, statTile, fmtBig, tone, buzz, unlockAudio, logTimed, showHowTo, extrasApi };
+  GB.app = { go, render, state, startSession, takeReturn, plural, openSettings, settingsButton, pageHeader, statTile, fmtBig, tone, buzz, unlockAudio, logTimed, showHowTo, extrasApi };
 
   init().catch((e) => console.error('GymBoy failed to start', e));
 })((window.GB = window.GB || {}));

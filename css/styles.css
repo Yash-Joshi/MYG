@@ -2549,6 +2549,32 @@ body.has-tabs .rest {
   font-weight: 800;
 }
 
+/* the one-tap workout card at the top of Home */
+.wk-card.quick {
+  display: block;
+}
+
+.wk-card.quick .eyebrow {
+  margin: 14px 0 8px;
+}
+
+.qs-row {
+  gap: 8px;
+}
+
+.chip.qs {
+  background: var(--surface-2, transparent);
+}
+
+.chip.qs.more {
+  border-style: dashed;
+  color: var(--muted, inherit);
+}
+
+.welcome .skip {
+  margin-top: 10px;
+}
+
 .tip {
   border-left: 4px solid var(--line);
 }

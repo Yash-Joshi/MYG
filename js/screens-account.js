@@ -143,7 +143,7 @@
         tab = 'signin';
         return draw();
       }
-      GB.app.go('home', true);
+      GB.app.go(GB.app.takeReturn() || 'home', true);
     }
 
     async function google() {
@@ -181,6 +181,7 @@
         local ? h('p', { class: 'demo-note' }, h('b', null, 'Demo mode. '), 'Your account lives on this device only. Real sign-in switches on when the account service is connected.') : null,
         h('p', { class: 'legal' }, 'By continuing you agree to how we handle your data. ', h('button', { class: 'link-btn inline', type: 'button', onclick: openLegal }, 'Read it in plain words'))
       );
+      const skip = h('button', { class: 'btn ghost big skip', type: 'button', onclick: () => GB.app.go('home') }, 'Not now, just log workouts');
 
       mount(page, 
         h('div', { class: 'brand big' }, h('span', { class: 'logo' }, icon('bolt', 20)), 'GYMBOY'),
@@ -192,7 +193,8 @@
           point('mic', 'Log every set, by voice if you like'),
           point('chart', 'See real progress, week after week')
         ),
-        form
+        form,
+        skip
       );
     }
 
@@ -396,7 +398,7 @@
         error = r.error || 'Could not save your profile. Please try again.';
         return draw();
       }
-      GB.app.go('home', true);
+      GB.app.go(GB.app.takeReturn() || 'home', true);
     }
 
     function draw() {
@@ -406,9 +408,7 @@
         h(
           'header',
           { class: 'wiz-head' },
-          step > 0 || editing
-            ? h('button', { class: 'icon-btn', type: 'button', 'aria-label': 'Back', onclick: () => (step > 0 ? ((step -= 1), (error = ''), draw()) : GB.app.go('home')) }, icon('back'))
-            : h('span', { class: 'icon-btn spacer' }),
+          h('button', { class: 'icon-btn', type: 'button', 'aria-label': step > 0 ? 'Back' : 'Not now', onclick: () => (step > 0 ? ((step -= 1), (error = ''), draw()) : GB.app.go('home')) }, icon('back')),
           h('div', { class: 'wiz-progress', role: 'progressbar', 'aria-valuemin': '1', 'aria-valuemax': String(steps.length), 'aria-valuenow': String(step + 1), 'aria-label': `Step ${step + 1} of ${steps.length}` }, h('i', { style: `width:${((step + 1) / steps.length) * 100}%` })),
           h('span', { class: 'wiz-count' }, `${step + 1}/${steps.length}`)
         ),

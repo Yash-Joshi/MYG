@@ -6,10 +6,14 @@ Plain HTML, CSS and JavaScript on the front end (no build step). The AI call and
 
 ## What it does
 
-**Account and profile**
-- **Sign in / create account** – email + password and Google, through Supabase. Until Supabase is connected the app runs in **demo mode**: a local account on this device, with everything below working.
-- **Onboarding questionnaire** – 5 short steps (about you, goal, training, daily life and food, a health check with consent). 18+ only. Drives the advice in your reports. Editable later in Settings → Edit profile.
-- **Home** – the landing page: your weight, height and BMI, a 30-day weight trend, progress toward your goal weight, a one-tap **Log weight**, your latest scan with its score, and your next workout.
+**Open by default**
+- **Logging a workout never needs an account.** Open the app and you land on Home: tap a day (Push, Pull, Legs, your most-used ones first) and you are logging. Workouts, history, progress and the timers are all open, and are stored on your device.
+- Only the **AI scan reports** ask you to get set up: a short profile, plus a sign-in once real accounts are connected. The server checks the sign-in on every scan request, so opening the workout screens does not open up the paid AI service.
+
+**Account and profile (optional)**
+- **Sign in / create account** – email + password and Google, through Supabase. Until Supabase is connected the app runs in **demo mode**, with everything below working and the profile kept on this device.
+- **Onboarding questionnaire** – 5 short steps (about you, goal, training, daily life and food, a health check with consent). 18+ only. Drives the advice in your reports. Reached from Home, Settings, or when you first tap Scan; you return to where you were headed. Editable later in Settings → Edit profile.
+- **Home** – the workout card comes first, then (once you have a profile) your weight, height and BMI, a 30-day weight trend, progress toward your goal weight, a one-tap **Log weight**, and your latest scan with its score.
 
 **Scan reports (AI)**
 - **Scan tab** – take a photo or choose images of an InBody result (printout or app screenshots). Images are shrunk and stripped of location data on the phone, then sent to `/api/analyze-scan`.
