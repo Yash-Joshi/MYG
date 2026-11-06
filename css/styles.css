@@ -3799,3 +3799,24 @@ body.has-tabs .rest {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ---------- share a workout as a picture ---------- */
+.share-preview {
+  display: block;
+  width: 100%;
+  max-height: 52vh;
+  object-fit: contain;
+  border-radius: 16px;
+  background: var(--surface-2);
+}
+
+.share-note {
+  margin-top: 12px;
+  font-size: 14px;
+}
+
+.btn.icon-only {
+  flex: none;
+  width: 52px;
+  padding: 0;
+}

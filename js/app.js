@@ -593,6 +593,12 @@
             sheet.close();
             openIntervalTimer(ctx);
           }),
+          menuItem('share', 'Share as picture', false, () => {
+            const exercises = collectExercises(a, false);
+            if (!exercises.length) return toast('Tick off a set first');
+            sheet.close();
+            GB.share.open({ dayName: a.dayName, startedAt: a.startedAt, endedAt: Date.now(), unit: a.unit, exercises });
+          }),
           menuItem('trash', 'Discard workout', true, async () => {
             sheet.close();
             if (await confirmSheet({ title: 'Discard this workout?', message: 'Everything you logged in this session will be lost.', confirmText: 'Discard', danger: true })) {
@@ -1148,9 +1154,9 @@
     });
   }
 
-  function saveSession(includePending) {
-    const a = state.active;
-    const exercises = a.exercises
+  // The live workout in its saved shape: ticked sets (and, if asked, typed-but-unticked ones).
+  function collectExercises(a, includePending) {
+    return a.exercises
       .map((ex) => {
         const timed = U.isTimed(ex);
         const sets = ex.sets
@@ -1162,6 +1168,11 @@
         return out;
       })
       .filter((ex) => ex.sets.length);
+  }
+
+  function saveSession(includePending) {
+    const a = state.active;
+    const exercises = collectExercises(a, includePending);
 
     if (!exercises.length) {
       toast('Nothing to save yet');
@@ -1292,6 +1303,7 @@
           h(
             'div',
             { class: 'row gap' },
+            h('button', { class: 'btn soft grow', type: 'button', onclick: () => GB.share.open(s) }, icon('share', 18), 'Share'),
             h(
               'button',
               {
@@ -1309,8 +1321,9 @@
             h(
               'button',
               {
-                class: 'btn soft danger-text',
+                class: 'btn soft danger-text icon-only',
                 type: 'button',
+                'aria-label': 'Delete workout',
                 onclick: async () => {
                   if (!(await confirmSheet({ title: 'Delete this workout?', message: `${s.dayName} on ${U.fmtDate(s.endedAt)} will be removed for good.`, confirmText: 'Delete', danger: true }))) return;
                   state.sessions = state.sessions.filter((x) => x.id !== s.id);
@@ -1320,8 +1333,7 @@
                   toast('Workout deleted');
                 },
               },
-              icon('trash', 18),
-              'Delete'
+              icon('trash', 18)
             )
           )
         )
